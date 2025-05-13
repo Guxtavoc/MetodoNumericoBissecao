@@ -108,6 +108,7 @@ public class TesteMetodo {
 		
 		gerarGrafico.addActionListener(new ActionListener() {//Botão do grafico
 			public void actionPerformed(ActionEvent arg0) {
+				if(testeVariaveis())
 				gerarGrafico(entradaExpressao.getText(), 
 						Double.parseDouble(txtMin.getText()),
 						Double.parseDouble(txtMax.getText()),
@@ -149,10 +150,9 @@ public class TesteMetodo {
 		JButton btnReset = new JButton("Reset");
 		btnReset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
 				textResultados.setText("");
 				txtErro.setText("0.00001");
-				txtPart.setText("10");
+				txtPart.setText("15");
 				txtMin.setText("0");
 				txtMax.setText("4");
 			}
@@ -163,10 +163,8 @@ public class TesteMetodo {
 
 		calculo.addActionListener(new ActionListener() {//Botão do calculo.
 			public void actionPerformed(ActionEvent arg0) {
-
+			if(testeVariaveis())
 				particiona(raizes);
-				//calcularBissesao();
-
 			}
 		});
 	}
@@ -174,7 +172,6 @@ public class TesteMetodo {
 	public ArrayList<Double> calcularBissesao(double min, double max, ArrayList<Double> raizes) {
 		Expression exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
 		double erro =  Double.parseDouble(txtErro.getText());
-		//ArrayList<Double> raizes = new ArrayList<>();
 		for (int i = 0; i < 100; i++) {
 			
 			exp.setVariable("x", min);
@@ -185,7 +182,12 @@ public class TesteMetodo {
 			double pm = (min + max) / 2;
 			exp.setVariable("x", pm);
 			double fPm = exp.evaluate();
-			textResultados.append(String.format("Iteração: %d f(%.6f) = %.6f\n", i + 1, pm, fPm));
+			 // Calculando erros se não for a primeira iteração
+			double pmAnterior = 0.0;
+			double erroAbs = i > 0 ? Math.abs(pm - pmAnterior) : 0.0;
+		    double erroRel = i > 0 ? (erroAbs / Math.abs(pm)) * 100 : 0.0;
+		    textResultados.append(String.format("Iteração: %2d | f(%.6f) = %.6f | Erro Abs = %.6f | Erro Rel = %.4f%%\n",i + 1, pm, fPm, erroAbs, erroRel));
+			//textResultados.append(String.format("Iteração: %d f(%.6f) = %.6f\n", i + 1, pm, fPm));
 			if (Math.abs(fPm) < erro) { //comparando o MODULO da raiz de f(pm) com o erro
 				txtRaiz.setText("" + pm); //Criando uma label invisivel para receber o valor da raiz
 				raizes.add(pm);
@@ -206,9 +208,10 @@ public class TesteMetodo {
 	
 	public void particiona(ArrayList<Double> raizes) {
 		raizes.clear();
-		Expression exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build(); 
+		Expression exp;
 		Double min = Double.parseDouble(txtMin.getText());
 		Double max = Double.parseDouble(txtMax.getText());
+		exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
 		int quantidade = Integer.parseInt(txtPart.getText());
 		Double particionamento = (max-min)/quantidade;
 		for (int i = 0; i < quantidade; i++) {
@@ -219,7 +222,6 @@ public class TesteMetodo {
 			exp.setVariable("x", b);
 			double fb = exp.evaluate();
 			if(fa * fb < 0) {
-				//Existe raiz
 				calcularBissesao(a,b,raizes);
 			}
 		}
@@ -228,8 +230,7 @@ public class TesteMetodo {
 	public void gerarGrafico(String expressao, double limiteMin, double limiteMax, ArrayList<Double> raizes) {
 		XYSeries series = new XYSeries("f(x)"); //"vetor" que receberá os pontos x e y
 		XYSeries raizSeries = new XYSeries("Raiz Aproximada");
-
-		Expression exp = new ExpressionBuilder(expressao).variable("x").build(); 
+		Expression exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
 
 		for (double x = limiteMin; x <= limiteMax; x += 0.1) { //Modificando o valor de x para gerar o grafico 
 			exp.setVariable("x", x);
@@ -278,5 +279,30 @@ public class TesteMetodo {
 		chartFrame.pack();
 		chartFrame.setLocationRelativeTo(null);
 		chartFrame.setVisible(true);
+	}
+	public boolean testeVariaveis() {
+		try {
+			if(entradaExpressao.getText().isEmpty()) {
+				textResultados.setText("A Expressão não pode ser vazia!");
+				return false;
+			}
+			new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
+			double min = Double.parseDouble(txtMin.getText());
+			double max = Double.parseDouble(txtMax.getText());
+			if(min>=max) {
+				textResultados.setText("Limites invalidos!");
+				return false;
+			}
+			double erro = Double.parseDouble(txtErro.getText());
+			double part = Integer.parseInt(txtPart.getText());
+			if(erro <= 0 || part <=0) {
+				textResultados.setText("Erro ou particionamento invalido!\nO valor do erro ou o Partionamento não podem ser negativos ou 0!");
+				return false;
+			}
+			return true;
+		}catch(java.lang.NumberFormatException |net.objecthunter.exp4j.tokenizer.UnknownFunctionOrVariableException e) {
+			textResultados.setText("Expressão ou argumentos invalidos!\nTente novamente...");
+			return false;
+		}
 	}
 }
