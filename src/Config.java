@@ -21,7 +21,7 @@ public class Config {
         initialize();
     }
 	private void initialize() {
-		 frame = new JFrame();
+		 /*frame = new JFrame();
 	        frame.setBounds(100, 100, 300, 200);
 	        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 	        frame.getContentPane().setLayout(null);
@@ -60,5 +60,6 @@ public class Config {
 	        });
 
 	        frame.setVisible(true);
+	        */
 	}
 	}

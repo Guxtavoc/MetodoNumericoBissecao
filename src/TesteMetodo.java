@@ -1,26 +1,11 @@
-import java.awt.Color;
 import java.awt.EventQueue;
 import javax.swing.*;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
-import net.objecthunter.exp4j.Expression;
 import net.objecthunter.exp4j.ExpressionBuilder;
-import org.jfree.chart.ChartFactory;
-import org.jfree.chart.ChartPanel;
-import org.jfree.chart.JFreeChart;
-import org.jfree.chart.plot.PlotOrientation;
-import org.jfree.chart.plot.XYPlot;
-import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
-import org.jfree.data.xy.XYSeries;
-import org.jfree.data.xy.XYSeriesCollection;
-import org.jfree.chart.plot.ValueMarker;
-import org.jfree.chart.plot.Marker;
-import java.awt.BasicStroke;
-
 
 public class TesteMetodo {
 
@@ -32,6 +17,8 @@ public class TesteMetodo {
 	private JTextField txtPart;
 	private JTextField txtErro;
 	private ArrayList<Double> raizes = new ArrayList<Double>();
+	private JComboBox<String> comboMetodo;
+	private Calc calc;
 	
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -48,9 +35,11 @@ public class TesteMetodo {
 
 	public TesteMetodo() {
 		initialize();
+		this.calc = new Calc(TesteMetodo.this);
 	}
 
 	private void initialize() {
+		
 		frame = new JFrame();
 		frame.setBounds(100, 100, 506, 600);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -97,8 +86,8 @@ public class TesteMetodo {
 		txtMax.setColumns(10);
 
 		JButton calculo = new JButton("Calcular");
-		calculo.setFont(new Font("Arial", Font.BOLD, 14));
-		calculo.setBounds(56, 129, 114, 21);
+		calculo.setFont(new Font("Arial", Font.BOLD, 13));
+		calculo.setBounds(257, 129, 89, 21);
 		frame.getContentPane().add(calculo);
 
 		textResultados = new JTextArea();
@@ -115,17 +104,14 @@ public class TesteMetodo {
 		
 		gerarGrafico.addActionListener(new ActionListener() {//Botão do grafico
 			public void actionPerformed(ActionEvent arg0) {
-				if(testeVariaveis())
-				gerarGrafico(entradaExpressao.getText(), 
-						Double.parseDouble(txtMin.getText()),
-						Double.parseDouble(txtMax.getText()),
-						raizes
-						);
+				if(testeVariaveis()) {
+					calc.gerarGrafico(entradaExpressao.getText(), Double.parseDouble(txtMin.getText()), Double.parseDouble(txtMax.getText()),raizes);
+				}		
 			}
 		});
 
-		gerarGrafico.setFont(new Font("Arial", Font.BOLD, 14));
-		gerarGrafico.setBounds(325, 129, 114, 21);
+		gerarGrafico.setFont(new Font("Arial", Font.BOLD, 13));
+		gerarGrafico.setBounds(356, 129, 83, 21);
 		frame.getContentPane().add(gerarGrafico);
 		
 		JLabel lblParticionamento = new JLabel("Partições");
@@ -139,7 +125,7 @@ public class TesteMetodo {
 		frame.getContentPane().add(lblErroPermitido);
 		
 		txtPart = new JTextField();
-		txtPart.setText("15");
+		txtPart.setText("1");
 		txtPart.setHorizontalAlignment(SwingConstants.CENTER);
 		txtPart.setFont(new Font("Tahoma", Font.BOLD, 12));
 		txtPart.setColumns(10);
@@ -154,19 +140,19 @@ public class TesteMetodo {
 		txtErro.setBounds(369, 95, 70, 19);
 		frame.getContentPane().add(txtErro);
 		
-		JButton btnReset = new JButton("Reset");
+		JButton btnReset = new JButton("Limpar");
 		btnReset.setToolTipText("Resetar os limites, partições e erro aos valores padrão");
 		btnReset.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				textResultados.setText("");
-				txtErro.setText("0.00001");
-				txtPart.setText("15");
-				txtMin.setText("0");
-				txtMax.setText("4");
+				//txtErro.setText("0.00001");
+				//txtPart.setText("15");
+				//txtMin.setText("0");
+				//txtMax.setText("4");
 			}
 		});
 		btnReset.setFont(new Font("Arial", Font.BOLD, 14));
-		btnReset.setBounds(190, 130, 114, 21);
+		btnReset.setBounds(325, 527, 114, 21);
 		frame.getContentPane().add(btnReset);
 		
 		JButton btnNewButton = new JButton("a");
@@ -174,188 +160,36 @@ public class TesteMetodo {
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				new Config(TesteMetodo.this);
-				//calculaFalsaPosicao();
 			}
 		});
-		btnNewButton.setBounds(426, 532, 56, 21);
+		btnNewButton.setBounds(383, 528, 56, 21);
 		frame.getContentPane().add(btnNewButton);
-		
 		JComboBox<String> comboMetodo = new JComboBox<>();
 		comboMetodo.addItem("Bisseção");
 		comboMetodo.addItem("Falsa Posição");
 		comboMetodo.setToolTipText("Selecione o método para o calcuulo");
-		comboMetodo.setBounds(56, 528, 169, 21);
+		comboMetodo.setBounds(121, 130, 114, 21);
 		frame.getContentPane().add(comboMetodo);
+		
+		JLabel lblMtodo = new JLabel("Método");
+		lblMtodo.setFont(new Font("Arial", Font.BOLD, 14));
+		lblMtodo.setBounds(56, 133, 55, 13);
+		frame.getContentPane().add(lblMtodo);
 
 		calculo.addActionListener(new ActionListener() {//Botão do calculo.
 			public void actionPerformed(ActionEvent arg0) {
-			if(testeVariaveis()) particiona(raizes,comboMetodo);
+				if(testeVariaveis()) {
+					calc.particiona(raizes, comboMetodo);
+				}
 			}
 		});
-	}
-	
-	public ArrayList<Double> calcularBissesao(double min, double max, ArrayList<Double> raizes) {
-		Expression exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
-		double erro =  Double.parseDouble(txtErro.getText());
-		double xAnterior = 0.0f;
-		double erroRelativo = 0,erroAbsoluto = 0;
-		for (int i = 0; i < 100; i++) {
-			
-			exp.setVariable("x", min);
-			double fMin = exp.evaluate();
-			exp.setVariable("x", max);
-			double fMax = exp.evaluate();			
-			
-			double pm = (min + max) / 2;
-			exp.setVariable("x", pm);
-			double fPm = exp.evaluate();
-			if(i!=0 && fPm!=0) {
-				erroRelativo = Math.abs((pm - xAnterior)/pm) * 100;
-				erroAbsoluto = Math.abs(pm-xAnterior);
-			}else {
-				erroRelativo = 100;
-			}
-			textResultados.append(String.format("Iteração: %d Xl: %.2f Xu: %.2f Xr: %f Ea: %.1f\n\n" , i+1,min,max,pm,erroRelativo));
-			if (Math.abs(fPm) < erro) { //comparando o MODULO da raiz de f(pm) com o erro
-				raizes.add(pm);
-				textResultados.append("Raiz aproximada encontrada: " + pm + "\n\n");
-				break;
-			}
-			if (fMin * fPm < 0) {
-			    max = pm;
-			    fMax = fPm;
-			} else {
-			    min = pm;
-			    fMin = fPm;
-			}
-			xAnterior = pm;
-		}
-		return raizes;
-	}
-	
-	public ArrayList<Double> calculaFalsaPosicao(double min, double max, ArrayList<Double> raizes) {
-		Expression exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
-		double pm = 0, fPm = 0,erro = Double.parseDouble(txtErro.getText());
-		double fMax,fMin,erroRelativo,xAnterior=0;
-		int iteracao=0;
-		do {
-			iteracao++;
-			if(iteracao!=0 && fPm!=0) {
-				erroRelativo = Math.abs((pm - xAnterior)/pm) * 100;
-			}else {
-				erroRelativo = 100;
-			}
-			exp.setVariable("x", max);
-			fMax = exp.evaluate();
-			exp.setVariable("x", min);
-			fMin = exp.evaluate();
-			pm = max-((fMax*(min-max))/(fMin-fMax));
-			exp.setVariable("x", pm);
-			fPm = exp.evaluate();
-			if (fMin * fPm < 0) {
-			    max = pm;
-			    fMax = fPm;
-			} else {
-				min = pm;
-				fMin = fPm;
-			}
-			xAnterior = pm;
-			textResultados.append(String.format("Iteração: %d Xl: %.2f Xu: %.2f Xr: %f Ea: %.1f\n\n" , iteracao+1,min,max,pm,erroRelativo));
-			}while(Math.abs(fPm) > erro);
-		raizes.add(pm);
-		textResultados.append("Raiz aproximada encontrada: " + pm + "\n\n");
-		return raizes;
-	}
-	
-	public void particiona(ArrayList<Double> raizes,JComboBox<String> comboMetodo) {
-		raizes.clear();
-		Expression exp;
-		Double min = Double.parseDouble(txtMin.getText());
-		Double max = Double.parseDouble(txtMax.getText());
-		exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
-		int quantidade = Integer.parseInt(txtPart.getText());
-		Double particionamento = (max-min)/quantidade;
-		for (int i = 0; i < quantidade; i++) {
-			double a = min + (i*particionamento);
-			double b = a + particionamento;
-			exp.setVariable("x", a);
-			double fa = exp.evaluate();
-			exp.setVariable("x", b);
-			double fb = exp.evaluate();
-			if(fa * fb < 0) {
-				String metodo = (String) comboMetodo.getSelectedItem();
-				if(metodo.equals("Bisseção")) {
-					calcularBissesao(a, b, raizes);
-				}else {
-					calculaFalsaPosicao(a, b, raizes);
-				}
-				//calcularBissesao(a,b,raizes);
-				//calculaFalsaPosicao(a, b, raizes);
-			}
-		}
-	}
-
-	public void gerarGrafico(String expressao, double limiteMin, double limiteMax, ArrayList<Double> raizes) {
-		XYSeries series = new XYSeries("f(x)"); //"vetor" que receberá os pontos x e y
-		XYSeries raizSeries = new XYSeries("Raiz Aproximada");
-		Expression exp = new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
-		for (double x = limiteMin; x <= limiteMax; x += 0.1) { //Modificando o valor de x para gerar o grafico 
-			exp.setVariable("x", x);
-			double y = exp.evaluate();
-			series.add(x, y); //Criando os pares ordenados de X e Y
-		}
-		//Calculando o valor e criando os par ordenado do ponto(s) da raiz
-		for (double raiz : raizes) {
-			exp.setVariable("x", raiz);
-			double yRaiz = exp.evaluate();
-			raizSeries.add(raiz, yRaiz);
-		}
 		
-		//Criando o dataset da função e raiz
-		XYSeriesCollection dataset = new XYSeriesCollection();
-		dataset.addSeries(series);
-		dataset.addSeries(raizSeries);
-
-		//definindo o grafico
-		JFreeChart chart = ChartFactory.createXYLineChart(
-				"Gráfico da Função", //Nome
-				"X", //Eixo horizontal
-				"Y", //Eixo vertical
-				dataset, //dataset com os pares ordenados
-				PlotOrientation.VERTICAL, //Oritanção do eixo Y
-				true, //Exibir legenda
-				false, //Exibir tooltips
-				false //Gerar link
-				);
-
-		//Setando o rederer 
-		XYPlot plot = chart.getXYPlot();
-		XYLineAndShapeRenderer renderer = new XYLineAndShapeRenderer();
-		renderer.setSeriesPaint(0, Color.BLUE); // f(x)
-		renderer.setSeriesShapesVisible(0, false);
-		renderer.setSeriesPaint(1, Color.RED); // ponto raiz
-		renderer.setSeriesLinesVisible(1, false);
-		renderer.setSeriesShape(1, new Ellipse2D.Double(-4, -4, 8, 8)); // circulo vermelho
-		plot.setRenderer(renderer);
-		
-		for (double raiz : raizes) {
-		    Marker marker = new ValueMarker(raiz); //Criando um marcador para criar a linha entre a raiz e o eixo x
-		    marker.setPaint(Color.black);
-		    marker.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0, new float[]{5.0f, 5.0f}, 0));
-		    plot.addDomainMarker(marker); //adicionando ao eixo X
-		}
-		//Criando o chartPanel e o atribuindo a um novo frame
-		ChartPanel chartPanel = new ChartPanel(chart);
-		JFrame chartFrame = new JFrame("Gráfico da função");
-		chartFrame.setContentPane(chartPanel);
-		chartFrame.pack();
-		chartFrame.setLocationRelativeTo(null);
-		chartFrame.setVisible(true);
 	}
 	
 	public boolean testeVariaveis() {
 		try {
 			if(entradaExpressao.getText().isEmpty()) {
+				textResultados.setText("O campo da expressão não pode ficar vazio!");
 				return false;
 			}
 			new ExpressionBuilder(entradaExpressao.getText()).variable("x").build();
@@ -377,11 +211,25 @@ public class TesteMetodo {
 		}
 	}
 
-	public JTextField getTxtMin() {
-	    return txtMin;
+	public double getTxtMin() {
+	    return Double.parseDouble(txtMin.getText());
 	}
-
-	public JTextField getTxtMax() {
-	    return txtMax;
+	public double getTxtMax() {
+	    return Double.parseDouble(txtMax.getText());
+	}
+	public JTextField getExpressao() {
+	    return entradaExpressao;
+	}
+	public double getErro() {
+		 return Double.parseDouble(txtErro.getText());
+	}
+	public double getParticao() {
+		return Double.parseDouble(txtPart.getText());
+	}
+	public JComboBox<String> getCombo(){
+		return comboMetodo;
+	}
+	public JTextArea getResultados() {
+		return textResultados;
 	}
 }
